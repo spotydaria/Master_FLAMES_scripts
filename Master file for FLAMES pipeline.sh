@@ -197,6 +197,11 @@ sbatch --export=SUSIE_OUT="HCM_MTAG",WD_PROJECT="/home/dkramarenk/projects/LAVA/
 
 squeue -u dkramarenk
 
+##########################################
+#      3.2 For failed finemapping
+##########################################
+
+
 # scp  dkramarenk@snellius.surf.nl:/${WD_PROJECT}/data/SUSIE/CCGWAS/regions_to_analyze.txt /Users/drkramarenko/OneDrive/Computation/GWAS/Project_DCM/SUSIER/
 ##########################################
 #        4.1 FLAMES annotate
@@ -236,9 +241,15 @@ export FUMA_result_folder="CC_MTAG"
 cd ${WD_PROJECT}/data/SUSIE/${FUMA_result_folder}/out/
 sbatch --export=FUMA_result_folder="CC_MTAG",WD_PROJECT="/home/dkramarenk/projects/LAVA/DCM_HCM" ${WD_PROJECT}/scripts/FLAMES_annotate.sh
 
+cd ${WD_PROJECT}/data/SUSIE/${FUMA_result_folder}/out/FLAMES_annotated_locus
+
+squeue -u dkramarenk
 
 # Check out
-cat ${WD_PROJECT}/data/SUSIE/*/out/FLAMES_annotate_*
+tail -n 20 ${WD_PROJECT}/data/SUSIE/*/out/FLAMES_annotate_*
+
+wc -l ${WD_PROJECT}/data/SUSIE/*/out/FLAMES_index.ind
+
 
 ##########################################
 #            4.2 FLAMES run
@@ -276,10 +287,13 @@ sbatch --export=FUMA_result_folder="CC_MTAG",WD_PROJECT="/home/dkramarenk/projec
 
 squeue -u dkramarenk
 
+cat ${WD_PROJECT}/data/SUSIE/*/out/FLAMES_run_*
+
 ##########################################
 #           5. Copy files to pc
 ##########################################
 
+head ${WD_PROJECT}/FLAMES_out/*/FLAMES_scores.txt
 export WD_PROJECT="/home/dkramarenk/projects/LAVA/DCM_HCM"
 scp  dkramarenk@snellius.surf.nl:/${WD_PROJECT}/FLAMES_out/* /Users/drkramarenko/OneDrive/Computation/GWAS/Project_SHARED_DCM_HCM/FLAMES_out/
 
@@ -313,7 +327,52 @@ for SUSIE_OUT in "DCM_GWAS" "HCM_GWAS" "CC_GWAS" "CC_MTAG" "DCM_MTAG" "HCM_MTAG"
   echo "Copying files from ${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/out to $LOCAL_DIR"
   scp dkramarenk@snellius.surf.nl:"${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/out/*" "$LOCAL_DIR/"
 done
+
 # Define the project directory
+tvorogSU1296!
 
-ll /Users/drkramarenko/OneDrive/Computation/GWAS/Project_SHARED_DCM_HCM/SUSIER_
+for SUSIE_OUT in "DCM_GWAS" "HCM_GWAS" "CC_GWAS" "CC_MTAG" "DCM_MTAG" "HCM_MTAG"; do
+  # Define the local target directory
+  LOCAL_DIR="/Users/drkramarenko/OneDrive/Computation/GWAS/Project_SHARED_DCM_HCM/SUSIER_${SUSIE_OUT}"
+  
+  # Check if the directory exists, create it if it doesn't
+  if [ ! -d "$LOCAL_DIR" ]; then
+    echo "Creating directory: $LOCAL_DIR"
+    mkdir -p "$LOCAL_DIR"
+  fi
+  
+  # Copy files from remote to local
+  echo "Copying files from ${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/ to $LOCAL_DIR"
+  scp dkramarenk@snellius.surf.nl:"${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/*" "$LOCAL_DIR/"
+done
 
+
+# Loop through each SUSIE_OUT value
+# for SUSIE_OUT in "DCM_GWAS" "HCM_GWAS" "CC_GWAS" "CC_MTAG" "DCM_MTAG" "HCM_MTAG"; do
+#   # Define the local target directory
+#   LOCAL_DIR="${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/out"
+
+#   # Navigate to the local directory
+#   cd ${LOCAL_DIR} 
+
+#   # Rename existing FLAMES_index.ind to FLAMES_index_old.ind if it exists
+#   if [[ -f "FLAMES_index.ind" ]]; then
+#     mv FLAMES_index.ind FLAMES_index_old.ind
+#     echo "Renamed FLAMES_index.ind to FLAMES_index_old.ind in $LOCAL_DIR"
+#   fi
+
+#   # Create the new FLAMES_index.ind file
+#   output_file="FLAMES_index.ind"
+#   echo -e "Filename\tAnnotfiles" > $output_file
+
+#   # Iterate through all files matching the pattern locus_*.txt
+#   for file in locus_*.txt; do
+#       # Construct the Annotfiles column
+#       annot_file="FLAMES_annotated_${file}"
+
+#       # Append the data to the output file
+#       echo -e "${file}\t${annot_file}" >> $output_file
+#   done
+
+#   echo "Generated $output_file in $LOCAL_DIR"
+# done

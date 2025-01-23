@@ -9,7 +9,7 @@ suppressPackageStartupMessages(library(Rfast))       # Fast data manipulation
 
 # Parse arguments for main script
 args <- commandArgs(trailingOnly = TRUE)
-# args <-c( "/home/dkramarenk/projects/LAVA/DCM_HCM/data/SUSIE/CC_GWAS/", "/home/dkramarenk/projects/LAVA/DCM_HCM/data/SUSIE/CC_GWAS/out/", "35512", "10")
+# args <-c( "/home/dkramarenk/projects/LAVA/DCM_HCM/data/SUSIE/HCM_MTAG/", "/home/dkramarenk/projects/LAVA/DCM_HCM/data/SUSIE/HCM_MTAG/out/", "35512", "10")
 
 # Check that correct number of arguments is provided
 if (length(args) != 4) {
@@ -117,25 +117,29 @@ for (i in 1:nrow(summarized_files)) {
     mutate(credible_id_37 = sapply(variable, function(x) subset_final_sumst_1[x, ]$credible_id_37)) %>%
     arrange(cs)
 
-    
-if (1 %in% credible_set_original$cs) {
-  print(paste0("Success: min_abs_corr = 0.5"))
-  credible_set_flames <- credible_set_original %>%
-    filter(cs > 0) %>%
-    select(cred1 = credible_id_37, prob1 = variable_prob)
 
-  credible_set_cs <- as.data.frame(fitted_summary$cs) %>%
-    arrange(cs)
+  credible_set_original_filt <- credible_set_original %>%
+      filter(cs > 0)
+       
+  if (nrow(credible_set_original_filt) > 0) {
+    rm(credible_set_original_filt)
+    print(paste0("Success: min_abs_corr = 0.5"))
+    credible_set_flames <- credible_set_original %>%
+      filter(cs > 0) %>%
+      select(cred1 = credible_id_37, prob1 = variable_prob)
 
-  summarized_files$susier[i] <- 1
-  summarized_files$min_abs_corr[i] <- min_abs_corr
-  summarized_files$cs_n[i] <- max(as.numeric(credible_set_original$cs), na.rm = TRUE)
+    credible_set_cs <- as.data.frame(fitted_summary$cs) %>%
+      arrange(cs)
+
+    summarized_files$susier[i] <- 1
+    summarized_files$min_abs_corr[i] <- min_abs_corr
+    summarized_files$cs_n[i] <- max(as.numeric(credible_set_original$cs), na.rm = TRUE)
 
 
-  unique_cs <- unique(credible_set_cs$cs)
+    unique_cs <- unique(credible_set_cs$cs)
 
-  # Save results if there are credible sets
-  # Save multiple files for credible sets if cs > 1
+    # Save results if there are credible sets
+    # Save multiple files for credible sets if cs > 1
     for (j in seq_along(unique_cs)) {
       locus_name = paste0("locus_", i, ".", j, "_min_abs_corr_", min_abs_corr)
       print(paste0("Processing ", locus_name))
@@ -147,9 +151,9 @@ if (1 %in% credible_set_original$cs) {
                   row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
                                     print(paste("Saving credible_set_original file to:", output_filename))
 
-    output_filename2 <- paste0(output_path, locus_name, ".txt")
-     cs_subset_sus <- cs_subset %>%
-     select(cred1 = credible_id_37, prob1 = variable_prob)
+      output_filename2 <- paste0(output_path, locus_name, ".txt")
+      cs_subset_sus <- cs_subset %>%
+      select(cred1 = credible_id_37, prob1 = variable_prob)
             write.table(cs_subset_sus,
                   file = output_filename2,
                   row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
@@ -163,24 +167,28 @@ if (1 %in% credible_set_original$cs) {
               row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
           print(paste("Saving annotated file to:", paste0(output_path, "cs_stats_locus_", i, ".txt")))
     }
+
   } else {
-  print(paste0("Failed: min_abs_corr = 0.5"))
-      min_abs_corr <- 0.25
-      fitted_rss <- susie_rss(bhat = subset_final_sumst_1$BETA, 
-                              shat = subset_final_sumst_1$SE, 
-                              R = ld_matrix_subset, 
-                              n = N_CC, L = susie_l,
-                              min_abs_corr = min_abs_corr)
-      fitted_summary <- summary(fitted_rss)
+    print(paste0("Failed: min_abs_corr = 0.5"))
+    min_abs_corr <- 0.25
+    fitted_rss <- susie_rss(bhat = subset_final_sumst_1$BETA, 
+                            shat = subset_final_sumst_1$SE, 
+                            R = ld_matrix_subset, 
+                            n = N_CC, L = susie_l,
+                            min_abs_corr = min_abs_corr)
+    fitted_summary <- summary(fitted_rss)
 
-      credible_set_original <- as.data.frame(fitted_summary$vars) %>%
-        mutate(variant_id_37= sapply(variable, function(x) subset_final_sumst_1[x, ]$variant_id_37)) %>%
-        mutate(variant_id_38 = sapply(variable, function(x) subset_final_sumst_1[x, ]$variant_id_38)) %>%
-        mutate(credible_id_37 = sapply(variable, function(x) subset_final_sumst_1[x, ]$credible_id_37)) %>%
-        arrange(cs)
+    credible_set_original <- as.data.frame(fitted_summary$vars) %>%
+      mutate(variant_id_37= sapply(variable, function(x) subset_final_sumst_1[x, ]$variant_id_37)) %>%
+      mutate(variant_id_38 = sapply(variable, function(x) subset_final_sumst_1[x, ]$variant_id_38)) %>%
+      mutate(credible_id_37 = sapply(variable, function(x) subset_final_sumst_1[x, ]$credible_id_37)) %>%
+      arrange(cs)
 
-        
-    if (1 %in% credible_set_original$cs) {
+    credible_set_original_filt <- credible_set_original %>%
+    filter(cs > 0)
+
+    if (nrow(credible_set_original_filt) > 0) {
+      rm(credible_set_original_filt)
       print(paste0("Success: min_abs_corr = 0.25"))
 
       credible_set_flames <- credible_set_original %>%
@@ -195,44 +203,75 @@ if (1 %in% credible_set_original$cs) {
       summarized_files$cs_n[i] <- max(as.numeric(credible_set_original$cs), na.rm = TRUE)
 
 
-    unique_cs <- unique(credible_set_cs$cs)
+      unique_cs <- unique(credible_set_cs$cs)
 
       # Save results if there are credible sets
       # Save multiple files for credible sets if cs > 1
-        for (j in seq_along(unique_cs)) {
+      for (j in seq_along(unique_cs)) {
         locus_name = paste0("locus_", i, ".", j, "_min_abs_corr_", min_abs_corr)
-          cs_subset <- credible_set_original %>% filter(cs == unique_cs[j])
-          output_filename <- paste0(output_path, "/orig_loc/locus_", i, ".", j, ".txt")
-          annot_filename <- paste0(output_path, "/FLAMES_annotated_locus_", i, ".", j, "_min_abs_corr", min_abs_corr, ".txt")
-          write.table(cs_subset,
-                      file = output_filename,
-                      row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+        cs_subset <- credible_set_original %>% filter(cs == unique_cs[j])
+        output_filename <- paste0(output_path, "/orig_loc/locus_", i, ".", j, ".txt")
+        annot_filename <- paste0(output_path, "/FLAMES_annotated_locus_", i, ".", j, "_min_abs_corr", min_abs_corr, ".txt")
+        write.table(cs_subset,
+                    file = output_filename,
+                    row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
           
-    output_filename2 <- paste0(output_path, locus_name, ".txt")
-     cs_subset_sus <- cs_subset %>%
-     select(cred1 = credible_id_37, prob1 = variable_prob)
+        output_filename2 <- paste0(output_path, locus_name, ".txt")
+        cs_subset_sus <- cs_subset %>%
+        select(cred1 = credible_id_37, prob1 = variable_prob)
             write.table(cs_subset_sus,
                   file = output_filename2,
                   row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
                         print(paste("Saving cs_subset file to:", output_filename2))
 
-      # Append each file to the index file for FLAMES
-      index_entry <- data.frame(Filename = paste0(locus_name, ".txt"), Annotfiles = paste0("FLAMES_annotated_",locus_name,".txt"))
+        # Append each file to the index file for FLAMES
+        index_entry <- data.frame(Filename = paste0(locus_name, ".txt"), Annotfiles = paste0("FLAMES_annotated_",locus_name,".txt"))
           write.table(index_entry, index_file_path, row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE, append = TRUE)
           write.table(credible_set_cs,
               file = paste0(output_path, "cs_stats_locus_", i, ".txt"),
               row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
           print(paste("Saving annotated file to:", paste0(output_path, "cs_stats_locus_", i, ".txt")))
-        }
-  } else {
-      summarized_files$susier[i] <- 0
-      summarized_files$min_abs_corr[i] <- NA
-      summarized_files$cs_n[i] <-NA
+      }
+    
+    } else {
+    # make pseudo set
+    subset_final_sumst_2 <- subset_final_sumst_1 %>%
+    filter(P < 5e-8) %>%  # Filter rows where P is less than 5e-8
+    arrange(P) 
 
-  print("No credible sets")
-}
-  # Save credible set summary if available
-}
+      if (nrow(subset_final_sumst_2) > 0) {
+        subset_final_sumst_3 <- subset_final_sumst_2 %>%        # Sort by P in ascending order
+          slice_head(n = 1) 
+
+        locus_name = paste0("locus_", i, ".","pseudo")
+        print(paste0("Processing ", locus_name))
+
+        output_filename2 <- paste0(output_path, locus_name, ".txt")
+        cs_subset_sus <- subset_final_sumst_3 %>%
+        select(cred1 = credible_id_37, prob1 = 1)
+                write.table(cs_subset_sus,
+                      file = output_filename2,
+                      row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+                            print(paste("Saving cs_subset file to:", output_filename2))
+        index_entry <- data.frame(Filename = paste0(locus_name, ".txt"), Annotfiles = paste0("FLAMES_annotated_",locus_name,".txt"))
+        write.table(index_entry, index_file_path, row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE, append = TRUE)
+                   
+        summarized_files$susier[i] <- 2
+        summarized_files$min_abs_corr[i] <- NA
+        summarized_files$cs_n[i] <- 1
+        print("Pseudo set")
+
+      } else {
+
+        summarized_files$susier[i] <- 0
+        summarized_files$min_abs_corr[i] <- NA
+        summarized_files$cs_n[i] <-NA
+
+      print("No credible sets")
+      }
+      # Save credible set summary if available
+    }
+  }
 }
 # Print a message indicating that the files have been saved successfully
 write.table(summarized_files, file = file.path(output_path, "regions_finemapped.txt"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
