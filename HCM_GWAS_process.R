@@ -35,7 +35,7 @@ print(paste("Data filtered by sample size. Remaining Rows:", nrow(dat)))
 
 # Select and rename columns
 print("Selecting relevant columns")
-dat <- dat[, c("rsid", "chr", "pos", "effect_allele", "noneffect_allele", "eaf", "beta", "se", "pvalue")]
+dat <- dat[, c("rsid", "chr", "pos", "effect_allele", "noneffect_allele", "eaf", "beta", "se", "pvalue", "n_samples")]
 
 # Calculate minor allele frequency (maf)
 print("Calculating minor allele frequency (maf)")
@@ -44,7 +44,9 @@ dat[dat$eaf > 0.5, 'maf'] <- 1 - dat[dat$eaf > 0.5, 'eaf']
 
 # Calculate effective sample size (n)
 print("Calculating effective sample size (n)")
-dat$n <- 1 / (2 * dat$maf * (1 - dat$maf) * (dat$se^2))
+dat$NMISS <- 1 / (2 * dat$maf * (1 - dat$maf) * (dat$se^2))
+
+dat <- dat[dat$eaf >= 0.005 & dat$eaf <= 0.995, ]
 
 # Calculate Z-scores
 print("Calculating Z-scores")
@@ -63,9 +65,15 @@ processed_data <- dat3 %>%
     CHR = chr, # Extract CHR
     BP = pos, # Extract BP
     SNP = paste0(CHR, ":", BP),
+    EAFREQ = eaf,
     A1 = effect_allele,
     A2 = noneffect_allele,
-    NMISS = n,
+    NMISS = NMISS,
+    N_samples = n_samples,
+    N_cases = NA,
+    N_controls = NA,
+    Neff = NA,
+
     BETA = beta,
     SE = se,
     P = pvalue) %>%

@@ -74,11 +74,15 @@ processed_data <- dat2 %>%
     CHR = CHR1,
     BP = BP1,
     SNP = paste0(CHR1, ":", BP1),
-    MAF = EAFREQ,
+    EAFREQ = EAFREQ,
     A1 = EA,
     A2 = NEA,
     BETA,
     SE,
+    N_samples = NA,
+    N_cases = NA,
+    N_controls = NA,
+    Neff = mtag_Neff,
     P) %>%
   filter(!is.na(CHR))
 

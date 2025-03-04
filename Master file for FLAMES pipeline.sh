@@ -1,6 +1,6 @@
 ##########################################
 #      Master file for FLAMES pipeline
-# Date: 09/12/2024
+#      Date: 24/01/2025
 ##########################################
 
 ## Environments:
@@ -9,6 +9,7 @@ conda activate LAVA_2024
 
 # set veribles. to remove -> unset
 export WD_PROJECT="/home/dkramarenk/projects/LAVA/DCM_HCM"
+cd ${WD_PROJECT}
 
 # /home/dkramarenk/projects/LAVA/DCM_HCM -> ${WD_PROJECT}
 ##########################################
@@ -52,26 +53,6 @@ cp /home/dkramarenk/projects/Project_DCM_GWAS/POP/1000_genomes_ALEX/1KGautos_fil
 ## HCM MTAG     +
 
 ##########################################
-#      How file should look like        #
-##########################################
-
-# # SumStats
-# CHR BP SNPID_UKB A1 A2 MAF BETA SE STAT P NMISS INFO_UKB
-# 1 113418061 rs2360008 G A 0.2261 -0.01392 0.01282 -1.086 0.2775 379831 1
-# 1 113418144 rs9429498 T C 0.001218 0.2492 0.1538 1.62 0.1051 379682 0.951417
-# 1 113418415 rs1237670 G A 0.2242 -0.01563 0.01286 -1.215 0.2244 379470 0.998238
-
-# # Input
-# phenotype	cases	controls	filename
-# asthma	44301	341521	vignettes/data/asthma.sumstats.txt
-# bmi	NA	NA	vignettes/data/bmi.sumstats.txt
-# depression	170756	329443	vignettes/data/depression.sumstats.txt
-# diabetes	18483	366937	vignettes/data/diabetes.sumstats.txt
-# hypothyroidism	13043	231847	vignettes/data/hypothyroidism.sumstats.txt
-# neuro	NA	NA	vignettes/data/neuro.sumstats.txt
-# rheuma	14361	43923	vignettes/data/rheuma.sumstats.txt
-
-##########################################
 #     1.1    Files processing            #
 ##########################################
 
@@ -92,9 +73,11 @@ sbatch ${WD_PROJECT}/scripts/compare_SNPs.sh
 ##########################################
 #     1.3     Transfer to PC             #
 ##########################################
+export WD_PROJECT="/home/dkramarenk/projects/LAVA/DCM_HCM"
 
-scp  dkramarenk@snellius.surf.nl:/${WD_PROJECT}/data/sumst_processed/* /Users/drkramarenko/Library/CloudStorage/OneDrive-Personal/Computation/GWAS/Project_SHARED_DCM_HCM/sumst_processed/
-
+scp  dkramarenk@snellius.surf.nl:/${WD_PROJECT}/data/sumst_processed/*exclMYBPC3reg* /Users/drkramarenko/Library/CloudStorage/OneDrive-Personal/Computation/GWAS/Project_SHARED_DCM_HCM/sumst_processed/
+/gpfs/work5/0/gusr0607/dkramarenko
+/gpfs/work5/0/gusr0607/dkramarenko/LAVA/DCM_HCM/data/sumst_processed/
 ##########################################
 # 1.4   FUMA/MAGMA -> files to SNELLIUS  #
 ##########################################
@@ -110,8 +93,8 @@ done
 
 cd  ${WD_PROJECT}/data/FUMA/
 
-mv FUMA_CCGWAS2 FUMA_CC_GWAS
-mv FUMA_CC_MTAG1 FUMA_CC_MTAG
+mv FUMA_CCGWAS2   FUMA_CC_GWAS
+mv FUMA_CC_MTAG1  FUMA_CC_MTAG
 mv FUMA_DCM_GWAS1 FUMA_DCM_GWAS
 mv FUMA_HCM_GWAS1 FUMA_HCM_GWAS
 mv FUMA_DCM_MTAG1 FUMA_DCM_MTAG
@@ -346,33 +329,6 @@ for SUSIE_OUT in "DCM_GWAS" "HCM_GWAS" "CC_GWAS" "CC_MTAG" "DCM_MTAG" "HCM_MTAG"
   scp dkramarenk@snellius.surf.nl:"${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/*" "$LOCAL_DIR/"
 done
 
+# Shared transfer
+scp dkramarenk@snellius.surf.nl://gpfs/work2/0/brugada/sjurgens/DCM_HCM_shared_opposing/DCM__HCM__ccMTAG_rg1constrained_mtagandrandom_meta_QCfull_exclMYBPC3reg.txt.gz /Users/drkramarenko/Library/CloudStorage/OneDrive-Personal/Computation/GWAS/Project_SHARED_DCM_HCM/sumst_processed/
 
-# Loop through each SUSIE_OUT value
-# for SUSIE_OUT in "DCM_GWAS" "HCM_GWAS" "CC_GWAS" "CC_MTAG" "DCM_MTAG" "HCM_MTAG"; do
-#   # Define the local target directory
-#   LOCAL_DIR="${WD_PROJECT}/data/SUSIE/${SUSIE_OUT}/out"
-
-#   # Navigate to the local directory
-#   cd ${LOCAL_DIR} 
-
-#   # Rename existing FLAMES_index.ind to FLAMES_index_old.ind if it exists
-#   if [[ -f "FLAMES_index.ind" ]]; then
-#     mv FLAMES_index.ind FLAMES_index_old.ind
-#     echo "Renamed FLAMES_index.ind to FLAMES_index_old.ind in $LOCAL_DIR"
-#   fi
-
-#   # Create the new FLAMES_index.ind file
-#   output_file="FLAMES_index.ind"
-#   echo -e "Filename\tAnnotfiles" > $output_file
-
-#   # Iterate through all files matching the pattern locus_*.txt
-#   for file in locus_*.txt; do
-#       # Construct the Annotfiles column
-#       annot_file="FLAMES_annotated_${file}"
-
-#       # Append the data to the output file
-#       echo -e "${file}\t${annot_file}" >> $output_file
-#   done
-
-#   echo "Generated $output_file in $LOCAL_DIR"
-# done

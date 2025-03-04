@@ -49,9 +49,14 @@ processed_data <- dat1 %>%
     SNP = paste0(CHR,":",BP),
     A1,
     A2,
+    EAFREQ = FRQ,
     BETA = mtag_beta,
     SE = mtag_se,
     Z = mtag_z,
+    N_samples = N,
+    N_cases = NA,
+    N_controls = NA,
+    Neff = NA,
     P = mtag_pval) %>%
  filter(!is.na(CHR), SNP %in% ref_hcm_snp$SNP)
 

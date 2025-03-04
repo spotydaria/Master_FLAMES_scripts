@@ -42,9 +42,12 @@ processed_data <- dat %>%
     SNP = paste0(CHR,":",BP),
     A1,
     A2,
-    BETA = mtag_beta,
-    SE = mtag_se,
+    EAFREQ = FRQ,
+    BETA = mtag_beta, # No renaming needed, but included for clarity
+    SE = mtag_se, # No renaming needed, but included for clarity,
+    Neff = N,
     Z = mtag_z,
+    N_samples = N,
     P = mtag_pval) %>%
  filter(!is.na(CHR))     
 

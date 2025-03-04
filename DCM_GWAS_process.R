@@ -61,9 +61,13 @@ processed_data <- dat2 %>%
     SNP = paste0(CHR, ":", BP1),
     A1 = EA,
     A2 = NEA,
-    MAF = EAFREQ,
+    EAFREQ = EAFREQ,
     BETA = BETA, # No renaming needed, but included for clarity
     SE,
+    N_samples = N,
+    N_cases = N_cases,
+    N_controls = N_controls,
+    Neff = 4/((1/N_cases)+(1/N_controls)),
     P = P, # No renaming needed, but included for clarity
     NMISS = N) %>%
   filter(!is.na(CHR))
